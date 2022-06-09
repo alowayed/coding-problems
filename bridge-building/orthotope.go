@@ -13,7 +13,7 @@ var (
 	ErrInternalState = errors.New("bridge piece was destroyed")
 )
 
-// Orthotope represents an orthotope in N = len(Lengths) dimentions with side lengths
+// Orthotope represents an orthotope in N = len(Lengths) dimensions with side lengths
 // n_1 = Lengths[0], n_2 = Lengths[1], ..., n_N = Lengths[N-1]
 //
 // Invariant:
@@ -119,8 +119,8 @@ func (o *Orthotope) Built(locs ...int) (bool, error) {
 	return true, nil
 }
 
-// BridgeComplete returns true if there is an orthoginally connected path
-// from 0 to o.Lengths[0]-1 along the 1st dimention.
+// BridgeComplete returns true if there is an orthogonally connected path
+// from 0 to o.Lengths[0]-1 along the 1st dimension.
 func (o *Orthotope) BridgeComplete() bool {
 
 	// TODO

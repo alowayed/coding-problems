@@ -1,8 +1,8 @@
-# Multi-Dimentional Bridge building
+# Multi-Dimensional Bridge building
 
 ## Problem
 
-Given an N dimentional orthotope of edge lengths n<sub>1</sub>, n<sub>2</sub>, ..., n<sub>N</sub>. Assume a bridge builder buids randomly by placing hypercubes within the orthotope. Determine when an orthogonally continuous path exists from 0 to n<sub>1</sub>-1 along the 1st dimention.
+Given an N dimensional orthotope of edge lengths n<sub>1</sub>, n<sub>2</sub>, ..., n<sub>N</sub>. Assume a bridge builder buids randomly by placing hypercubes within the orthotope. Determine when an orthogonally continuous path exists from 0 to n<sub>1</sub>-1 along the 1st dimension.
 
 ## Example
 
@@ -78,9 +78,9 @@ An end state at which we stop the builder may look like this:
 
 You are given some starting code to work with. It includes:
 
-- An `Orthotope` object struct that represents the space the brindge pieaces can be built in.
-- A `Orthotope.Built(loc..)` function that returns whether or not there is a bridge piece at loc.
+- An `Orthotope` struct that represents the space the bridge pieaces can be built in.
+- A `Orthotope.Built(locs..)` function that returns whether or not there is a bridge piece at locs.
 
 ## Requirment
 
-Implement the `Orthotope.BridgeComplete()` function according to its definition such that it passes the existing test cases.
+Implement the `Orthotope.BridgeComplete()` function according to its definition such that it passes the existing test cases. You may add and use additional fields to the `Orthotope` struct but it is not recommended to change existing fields.
