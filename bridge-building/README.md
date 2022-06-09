@@ -2,14 +2,14 @@
 
 ## Problem
 
-Given an N dimentional orthotope of edge lengths n_1, n_2, ..., n_N. Assume a bridge builder buids randomly by placing hypercubes within the orthotope. Determine when the bridge creates a continuous path between two opposing sides of a single dimention. Create a function that given the N lengths of the orthotope and a random piece location generator, called the "builder", calls the builder the least number of times before a path is created.
+Given an N dimentional orthotope of edge lengths n<sub>1</sub>, n<sub>2</sub>, ..., n<sub>N</sub>. Assume a bridge builder buids randomly by placing hypercubes within the orthotope. Determine when a continuous path exists along the 1st dimention from 0 to n<sub>1</sub>-1.
 
 ## Example
 
-## 1-D
+### 1D
 
-The 1-D version of this problem can be represented as a straight line along an x axis.
-Let us pick a length n_1 = 5:
+The 1D version of this problem can be represented as a straight line along an x axis.
+Let us pick a length n<sub>1</sub> = 5 where the 'o's denote the lack of a bridge piece.:
 
 ```
 0 1 2 3 4
@@ -17,7 +17,7 @@ Let us pick a length n_1 = 5:
 o o o o o
 ```
 
-In this example, a bridge builder may place their first piece, represented by the charectar 'B':
+A bridge builder may place their first piece, represented by the charectar 'B', randomly at 1:
 
 ```
 0 1 2 3 4
@@ -25,8 +25,8 @@ In this example, a bridge builder may place their first piece, represented by th
 o B o o o
 ```
 
-The side do not have a continous path through the bridge and so we continue building.
-The buiding places their second piece:
+The sides do not have a continous path through the bridge and so we continue building.
+The buider places their second piece at 3:
 
 ```
 0 1 2 3 4
@@ -34,7 +34,7 @@ The buiding places their second piece:
 o B o B o
 ```
 
-The bridge still does not connect both sides. So we allow the building to continue placing 4 more pieces:
+The bridge still does not connect both sides. So we allow the builder to continue placing 3 more pieces:
 
 ```
 0 1 2 3 4
@@ -42,12 +42,12 @@ The bridge still does not connect both sides. So we allow the building to contin
 B B B B B
 ```
 
-Now the bridge is complete and we stopped the building process.
+Now the bridge is complete and we stop the building process.
 
-## 2-D
+### 2-D
 
-The 2-D case is more interesting and can be represented by an x and y axes.
-Let us pick lengths n_1 = 4 and n_2 = 5 respectively:
+The 2-D case is more interesting and can be represented by an x and y axis.
+Let us pick lengths n<sub>1</sub> = 4 and n<sub>2</sub> = 5 respectively:
 
 ```
     0 1 2 3
@@ -60,7 +60,6 @@ Let us pick lengths n_1 = 4 and n_2 = 5 respectively:
   v
 ```
 
-The numbers have been placed ourside of the orthotope for simpler representation and the 'o's denote the lack of a bridge piece.
 In this example, we must wait until the bridge builder has randomly placed enough pieces to connect the left and right sides.
 An end state at which we stop the builder may look like this:
 
@@ -75,13 +74,13 @@ An end state at which we stop the builder may look like this:
   v
 ```
 
-```
-func BridgeComplete() bool {
-  // TODO
-}
+## Helper Structs and Functions
 
-func main() {
+You are given some starting code to work with. It includes:
 
-  o := 
-}
-```
+- An `Orthotope` object struct that represents the space the brindge pieaces can be built in.
+- A `Orthotope.Built(loc..)` function that returns whether or not there is a bridge piece at loc.
+
+## Requirment
+
+Implement the `Orthotope.BridgeComplete` function such that it passes the existing test cases.
