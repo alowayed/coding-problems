@@ -226,7 +226,8 @@ func TestOrthotope_BuildRandom(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    *Orthotope
+		want    []int
+		wantO   *Orthotope
 		wantErr bool
 	}{
 		{
@@ -236,7 +237,8 @@ func TestOrthotope_BuildRandom(t *testing.T) {
 				bridges:    map[string]bool{},
 				nonBridges: map[string]bool{"0": true},
 			},
-			want: &Orthotope{
+			want: []int{0},
+			wantO: &Orthotope{
 				Lengths:    []int{1},
 				bridges:    map[string]bool{"0": true},
 				nonBridges: map[string]bool{},
@@ -250,7 +252,8 @@ func TestOrthotope_BuildRandom(t *testing.T) {
 				bridges:    map[string]bool{"1": true},
 				nonBridges: map[string]bool{"0": true},
 			},
-			want: &Orthotope{
+			want: []int{0},
+			wantO: &Orthotope{
 				Lengths: []int{2},
 				bridges: map[string]bool{
 					"0": true,
@@ -270,7 +273,8 @@ func TestOrthotope_BuildRandom(t *testing.T) {
 				},
 				nonBridges: map[string]bool{},
 			},
-			want: &Orthotope{
+			want: []int{},
+			wantO: &Orthotope{
 				Lengths: []int{2},
 				bridges: map[string]bool{
 					"0": true,
@@ -289,11 +293,15 @@ func TestOrthotope_BuildRandom(t *testing.T) {
 				bridges:    tt.fields.bridges,
 				nonBridges: tt.fields.nonBridges,
 			}
-			if err := o.BuildRandom(); (err != nil) != tt.wantErr {
+			got, err := o.BuildRandom()
+			if (err != nil) != tt.wantErr {
 				t.Errorf("Orthotope.BuildRandom() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if !reflect.DeepEqual(o, tt.want) {
-				t.Errorf("Orthotope.BuildRandom() -> %+v, want %+v", *o, *tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Orthotope.BuildRandom() = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(o, tt.wantO) {
+				t.Errorf("Orthotope.BuildRandom() -> %+v, want %+v", *o, *tt.wantO)
 			}
 		})
 	}
@@ -440,7 +448,52 @@ func TestOrthotope_inBound(t *testing.T) {
 		args   args
 		want   bool
 	}{
-		// TODO: Add test cases.
+		{
+			name:   "0D in bound",
+			fields: fields{},
+			args: args{
+				locs: []int{},
+			},
+			want: true,
+		},
+		{
+			name:   "0D out of bound",
+			fields: fields{},
+			args: args{
+				locs: []int{1},
+			},
+			want: false,
+		},
+		{
+			name: "1D in bound",
+			fields: fields{
+				Lengths: []int{4},
+			},
+			args: args{
+				locs: []int{2},
+			},
+			want: true,
+		},
+		{
+			name: "2D in bound",
+			fields: fields{
+				Lengths: []int{3, 4},
+			},
+			args: args{
+				locs: []int{0, 3},
+			},
+			want: true,
+		},
+		{
+			name: "2D out of bound",
+			fields: fields{
+				Lengths: []int{3, 4},
+			},
+			args: args{
+				locs: []int{0, 4},
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -465,7 +518,27 @@ func Test_key(t *testing.T) {
 		args args
 		want string
 	}{
-		// TODO: Add test cases.
+		{
+			name: "empty",
+			args: args{
+				locs: []int{},
+			},
+			want: "",
+		},
+		{
+			name: "single",
+			args: args{
+				locs: []int{1},
+			},
+			want: "1",
+		},
+		{
+			name: "multiple",
+			args: args{
+				locs: []int{1, 2, 5},
+			},
+			want: "1-2-5",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -486,7 +559,36 @@ func Test_locations(t *testing.T) {
 		want    []int
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "empty",
+			args: args{
+				key: "",
+			},
+			wantErr: false,
+		},
+		{
+			name: "single",
+			args: args{
+				key: "1",
+			},
+			want:    []int{1},
+			wantErr: false,
+		},
+		{
+			name: "multiple",
+			args: args{
+				key: "1-2-5",
+			},
+			want:    []int{1, 2, 5},
+			wantErr: false,
+		},
+		{
+			name: "wrong format",
+			args: args{
+				key: "-1",
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -496,7 +598,78 @@ func Test_locations(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("locations() = %v, want %v", got, tt.want)
+				t.Errorf("locations() = %v (%v), want %v (%v)", got, got == nil, tt.want, tt.want == nil)
+			}
+		})
+	}
+}
+
+func TestOrthotope_Neighbors(t *testing.T) {
+	type fields struct {
+		Lengths    []int
+		bridges    map[string]bool
+		nonBridges map[string]bool
+	}
+	type args struct {
+		locs []int
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    [][]int
+		wantErr bool
+	}{
+		{
+			name: "",
+			fields: fields{
+				Lengths:    []int{3, 4},
+				bridges:    twoD,
+				nonBridges: map[string]bool{},
+			},
+			args: args{
+				locs: []int{1, 2},
+			},
+			want: [][]int{
+				{0, 2},
+				{2, 2},
+				{1, 1},
+				{1, 3},
+			},
+			wantErr: false,
+		},
+		{
+			name: "",
+			fields: fields{
+				Lengths:    []int{2, 2, 2},
+				bridges:    threeD,
+				nonBridges: map[string]bool{},
+			},
+			args: args{
+				locs: []int{0, 1, 1},
+			},
+			want: [][]int{
+				{1, 1, 1},
+				{0, 0, 1},
+				{0, 1, 0},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &Orthotope{
+				Lengths:    tt.fields.Lengths,
+				bridges:    tt.fields.bridges,
+				nonBridges: tt.fields.nonBridges,
+			}
+			got, err := o.Neighbors(tt.args.locs...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Orthotope.Neighbors() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Orthotope.Neighbors() = %v, want %v", got, tt.want)
 			}
 		})
 	}
