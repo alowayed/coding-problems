@@ -172,11 +172,113 @@ func (o *Orthotope) Neighbors(locs ...int) ([][]int, error) {
 
 // BridgeComplete returns true if there is an orthogonally connected path
 // from 0 to o.Lengths[0]-1 along the 1st dimension.
-func (o *Orthotope) BridgeComplete() bool {
+func (o *Orthotope) BridgeComplete() (bool, error) {
 
-	// TODO
+	visited := map[string]bool{}
+	for k := range o.bridges {
+		if _, ok := visited[k]; ok {
+			continue
+		}
 
-	return false
+		// BFS
+		left := false
+		right := false
+		var q []string
+		q = append(q, k)
+		for len(q) > 0 {
+			cur := q[0]
+			q = q[1:]
+
+			// Skip visited locations
+			if _, ok := visited[cur]; ok {
+				continue
+			}
+			visited[cur] = true
+
+			loc, err := locations(cur)
+			if err != nil {
+				return false, fmt.Errorf("failed to turn key %q into lcoation: %w", cur, err)
+			}
+
+			// Check if we've reached both sides
+			if loc[0] == 0 {
+				left = true
+			}
+			if loc[0] == o.Lengths[0]-1 {
+				right = true
+			}
+			if left && right {
+				return true, nil
+			}
+
+			// Get neighbors and add to queue
+			neighbors, err := o.Neighbors(loc...)
+			if err != nil {
+				return false, fmt.Errorf("failed to generate neighbors from %v into lcoation: %w", loc, err)
+			}
+
+			for _, n := range neighbors {
+				nk := key(n...)
+				if bridge, ok := o.bridges[nk]; bridge && ok {
+					q = append(q, nk)
+				}
+			}
+		}
+	}
+
+	return false, nil
+}
+
+func (o *Orthotope) String() string {
+
+	switch len(o.Lengths) {
+	case 0:
+		return ""
+	case 1:
+		return o.string1D()
+	case 2:
+		return o.string2D()
+	default:
+		return "HIGHER DIMENSIONS UNSUPPORTED"
+	}
+}
+
+func (o *Orthotope) string1D() string {
+
+	var str string
+	for i := 0; i < o.Lengths[0]; i++ {
+		k := key(i)
+		b, ok := o.bridges[k]
+		s := "."
+		if b && ok {
+			s = "B"
+		}
+		str += " " + s
+	}
+
+	return str
+}
+
+func (o *Orthotope) string2D() string {
+
+	n1Max := o.Lengths[0]
+	n2Max := o.Lengths[1]
+
+	var str string
+	for n2 := 0; n2 < n2Max; n2++ {
+		for n1 := 0; n1 < n1Max; n1++ {
+			k := key(n1, n2)
+			b, ok := o.bridges[k]
+			s := "."
+			if b && ok {
+				s = "B"
+			}
+			str += " " + s
+		}
+		str += "\n"
+	}
+
+	return str
 }
 
 func (o *Orthotope) inBound(locs ...int) bool {

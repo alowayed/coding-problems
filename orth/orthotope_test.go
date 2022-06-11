@@ -351,9 +351,10 @@ func TestOrthotope_BridgeComplete(t *testing.T) {
 		nonBridges map[string]bool
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		want   bool
+		name    string
+		fields  fields
+		want    bool
+		wantErr bool
 	}{
 		{
 			name: "empty",
@@ -362,7 +363,8 @@ func TestOrthotope_BridgeComplete(t *testing.T) {
 				bridges:    map[string]bool{},
 				nonBridges: twoD,
 			},
-			want: false,
+			want:    false,
+			wantErr: false,
 		},
 		{
 			name: "disconnected bridges",
@@ -389,7 +391,8 @@ func TestOrthotope_BridgeComplete(t *testing.T) {
 					"2-3": true,
 				},
 			},
-			want: false,
+			want:    false,
+			wantErr: false,
 		},
 		{
 			name: "connected bridges",
@@ -416,7 +419,8 @@ func TestOrthotope_BridgeComplete(t *testing.T) {
 					"2-3": true,
 				},
 			},
-			want: true,
+			want:    true,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -426,7 +430,11 @@ func TestOrthotope_BridgeComplete(t *testing.T) {
 				bridges:    tt.fields.bridges,
 				nonBridges: tt.fields.nonBridges,
 			}
-			if got := o.BridgeComplete(); got != tt.want {
+			got, err := o.BridgeComplete()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Orthotope.BridgeComplete() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if got != tt.want {
 				t.Errorf("Orthotope.BridgeComplete() = %v, want %v", got, tt.want)
 			}
 		})
